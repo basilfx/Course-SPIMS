@@ -23,12 +23,26 @@ def structurize(func=None, bytes=4, fmt_in="I", fmt_out="I"):
 	# Done
 	return _inner
 
+def consume(func=None, bytes=4):
+	# Next time we'll be decorating method
+	if func is None:
+		return functools.partial(consume, bytes=bytes)
+
+	# Register function property
+	func.input_size = bytes
+
+	# Done
+	return func
+
 @structurize(bytes=8, fmt_in="II", fmt_out="Q")
 def test(input):
-	"""
-	Consume 8 bytes each time, convert to two integers and return a long
-	"""
+	# Sum two integers from 8 bytes of input
 	return input[0] + input[1]
+
+@consume(bytes=6)
+def test2(input):
+	# Return 12 bytes
+	return input + input
 
 def raw(input):
 	result_str = ""

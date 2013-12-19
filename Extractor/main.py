@@ -8,6 +8,7 @@ import collections
 # Define all extractors here
 EXTRACTORS = [
     test,
+    test2,
 #    raw,
 #    merged,
 #    sha256,
@@ -74,7 +75,7 @@ def main(argv):
 
                 # Iterate over each device
                 for device, data in device_data_dict.iteritems():
-                    current_device_file = os.path.join(current_output_dir, "%s.txt" % name)
+                    current_device_file = os.path.join(current_output_dir, "%s.txt" % device)
 
                     with open(current_device_file, "w+") as output_file:
                         # Grab extractor properties
