@@ -3,6 +3,7 @@ from django.db.models import Sum, Count, Min, Max, Avg, Q, F
 
 from otp_analyzer.models import Record
 
+import numpy as np
 import pylab
 
 def get_distinct_models():
@@ -59,20 +60,50 @@ def plot_histogram_top_n(n, m, p, **lookups):
     data = []
     models = []
 
+    figure = pylab.figure()
+    axis = figure.add_subplot(1, 1, 1)
+
     for n in top_n:
         data.append(map(lambda x: min(x.sensor_da2_max, m), Record.objects.filter(model=n["model"])))
         models.append(n["model"])
 
-    n, bins, patches = pylab.hist(data, p, histtype="bar", label=models)
+    n, bins, patches = axis.hist(data, p, histtype="bar", label=models)
 
     pylab.grid(True)
     pylab.legend()
     pylab.tight_layout()
     pylab.show()
 
+def plot_histogram_all(m, p, **lookups):
+    data = []
+
+    figure = pylab.figure()
+    axis = figure.add_subplot(1, 1, 1)
+
+    data.append(map(lambda x: min(x.sensor_da2_max, m), Record.objects.all()))
+
+    n, bins, patches = axis.hist(data, p, histtype="bar")
+
+    # Draw cumulative line
+    axis_cum = axis.twinx()
+    n = [ float(x) / len(data[0]) * 100.0 for x in np.cumsum(n) ]
+    print n, x
+    axis_cum.plot(bins, [0.0] + n, 'r--')
+    axis_cum.set_ylim([0, 100])
+    axis_cum.set_ylabel("Cumulative Frequency (%)")
+
+    pylab.grid(True)
+    pylab.legend()
+    pylab.tight_layout()
+    pylab.show()
+
+
 def plot_histogram_rounds(**lookups):
     records = Record.objects.filter(**lookups)
     data = {}
+
+    figure = pylab.figure()
+    axis = figure.add_subplot(1, 1, 1)
 
     for record in records:
         if not record.rounds in data:
@@ -80,10 +111,11 @@ def plot_histogram_rounds(**lookups):
 
         data[record.rounds].append(record.sensor_da2_max)
 
-    n, bins, patches = pylab.hist(list(data.itervalues()), 15, histtype="bar", label=map(str, data.iterkeys()))
+    n, bins, patches = axis.hist(list(data.itervalues()), 15, histtype="bar", label=map(str, data.iterkeys()))
 
     pylab.grid(True)
     pylab.legend()
+    pylab.tight_layout()
     pylab.show()
 
 def plot_cluster():
