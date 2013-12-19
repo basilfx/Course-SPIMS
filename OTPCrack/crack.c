@@ -16,8 +16,8 @@ void md5_hash(uint8_t *message, uint32_t *hash) {
     hash[3] = UINT32_C(0x10325476);
 
     int i = 0;
-    //for (i = 0; i + 64 <= 16; i += 64)
-    md5_compress(hash, (uint32_t*)(message + i));
+    for (i = 0; i + 64 <= 16; i += 64)
+        md5_compress(hash, (uint32_t*)(message + i));
 
     uint32_t block[16];
     uint8_t *byteBlock = (uint8_t*)block;
@@ -77,10 +77,8 @@ void *bruteforce1(void *data) {
     return NULL;
 }
 
-static uint32_t h[16] = { 239, 117, 58, 70, 46, 135, 146, 75, 37, 194, 232, 173, 218, 8, 143, 110 };
-//static uint32_t ref[16] = { 177, 28, 139, 208, 155, 92, 86, 180, 249, 16, 2, 171, 22, 251, 248, 100 };
-static uint32_t k[4] =  {3498777777, 3025558683, 2869039353, 1694038806};
-static uint8_t t[] = "AABBCCDDEEFFGGHH";
+static uint32_t h[4] = { 2119217689, 4016722015, 1635216761, 4033479585 }; // == 65.9233762112778
+static uint8_t t[16] = { '6', '5', '.', '9', '2', '3', '3', '7', '6', '2', '1', '1', '2', '7', '7', '8' };
 
 void *bruteforce(void *data) {
     t_arguments* arguments = (t_arguments *)data;
@@ -95,12 +93,12 @@ void *bruteforce(void *data) {
     int r_start = arguments->r_start;
     int r_step = arguments->r_step;
 
-    for (r[0] = '7'; r[0] <= '9'; r[0]++) {
-        for (r[1] = '1'; r[1] <= '9'; r[1]++) {
+    for (r[0] = '6'; r[0] <= '9'; r[0]++) {
+        for (r[1] = '5'; r[1] <= '9'; r[1]++) {
         //for (r[2] = '1'; r[2] <= '9'; r[2]++) {
-            for (r[3] = '0'; r[3] <= '9'; r[3]++) {
-                for (r[4] = '0'; r[4] <= '9'; r[4]++) {
-                    for (r[5] = '0'; r[5] <= '9'; r[5]++) {
+            for (r[3] = '9'; r[3] <= '9'; r[3]++) {
+                for (r[4] = '2'; r[4] <= '9'; r[4]++) {
+                    for (r[5] = '3'; r[5] <= '9'; r[5]++) {
                         for (r[6] = '0'; r[6] <= '9'; r[6]++) {
                             for (r[7] = '0'; r[7] <= '9'; r[7]++) {
                                 printf("Thread %d: %d\n", r_index, r_count++);
@@ -159,6 +157,7 @@ void *bruteforce(void *data) {
     }
 
     end:
+    exit(0);
     return NULL;
 }
 
@@ -166,7 +165,10 @@ void test() {
     uint32_t d[4];
     md5_hash(t, d);
 
-    if (k[0] == d[0] && k[1] == d[1] && k[2] == d[2] && k[3] == d[3]) {
+    printf("%u  %u  %u  %u\n", h[0], h[1], h[2], h[3]);
+    printf("%u  %u  %u  %u\n", d[0], d[1], d[2], d[3]);
+
+    if (h[0] == d[0] && h[1] == d[1] && h[2] == d[2] && h[3] == d[3]) {
         printf("MD5 OK\r\n");
     }
 }
