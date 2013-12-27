@@ -1,2 +1,3 @@
 # OTPAnalyzer/.gitignore
 # OTPTest/.gitignore
+Generator/*.pyc

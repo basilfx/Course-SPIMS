@@ -31,7 +31,7 @@ def von_neumann(input):
 
 	return map(von_neumann_single, input)
 
-def aes_128_cbc_mac(input):
+def aes128_cbc_mac(input):
 	aes = AES.new("xxx", AES.MODE_CBC, block_size = 8)
 	items = []
 	for item in input:

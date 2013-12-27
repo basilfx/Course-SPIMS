@@ -17,7 +17,7 @@ EXTRACTORS = [
 
 # Generators take entropy and generate random numbers
 GENERATORS = [
-    SHA1Gen,
+    SHA256Gen,
     AES128CtrGen,
     OpenSSLPRNGen
 ]
