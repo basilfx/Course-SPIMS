@@ -22,6 +22,9 @@ GENERATORS = [
     OpenSSLPRNGen
 ]
 
+# Defines the number of random numbers that must be generated
+NUMBERS_OUTPUT_SIZE = 5000000
+
 def chunks(l, n):
     """
     Yield successive n-sized chunks from l.
@@ -92,7 +95,7 @@ def main(argv):
                                     # Call extractor then generator
                                     gen = generator.__init__(extractor(bytes))
 
-                                    for i in range(5000000):
+                                    for i in range(NUMBERS_OUTPUT_SIZE):
                                         # Write output to file
                                         output_file.write(gen.get_rand())
 

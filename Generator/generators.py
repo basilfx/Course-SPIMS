@@ -1,6 +1,8 @@
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 
+# Generates a random number by making a number of the SHA-256
+# hash for each of the extracted inputs
 class SHA256Gen:
 	name = "sha256"
 
@@ -14,9 +16,10 @@ class SHA256Gen:
 		input[self.index] = processed
 		return processed
 		
-
+# Generates a random number by applying the AES counter cipher to the
+# sequence of extracted inputs
 class AES128CtrGen:
-	name = "aes128ctr"
+	name = "aes128_ctr"
 	
 	def __init__(self, input):
 		self.input = input
@@ -29,6 +32,8 @@ class AES128CtrGen:
 		self.counter = self.counter + 1 % len(self.input)
 		return processed
 
+# Generates random numbers by using the OpenSSL pseudorandom number
+# generator with the entropy coming from the extracted randomness
 class OpenSSLPRNGen:
 	name = "openssl_prng"
 
