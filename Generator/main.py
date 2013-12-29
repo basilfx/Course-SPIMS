@@ -5,6 +5,7 @@ import sys
 import glob
 import os
 import collections
+import struct
 
 # Extractors are transformations that attempt to extract
 # randomness from non-randomness in entropy sources
@@ -45,7 +46,16 @@ def main(argv):
 
     for file_name in file_names:
         with open(file_name, "r") as input_file:
-            next(input_file)
+            # Parse file type
+            file_type = next(input_file).strip()
+
+            if file_type == "# General":
+                mapper = float
+                formatting = "fff"
+            elif file_type == "# Raw":
+                mapper = int
+                formatting = "hhh"
+
             # Parse device string from line 2
             device_string = next(input_file).strip()
             # Parse generated unique id for device
@@ -57,17 +67,17 @@ def main(argv):
 
             for line in input_file:
                 if ";" in line:
-                    result = map(float, line.split(";")[1:])
+                    result = map(mapper, line.split(";")[1:])
 
                     if result:
                         # Unpack a line
                         first, second, third = result
 
-                        # Float to ints
-                        data = struct.pack("fff", first, second, third)
-                        #data = struct.unpack("III", data)
+                        # Convert to bytes
+                        data = struct.pack(formatting, first, second, third)
 
                         # Store it
+                        print data
                         device_data_dict["%s_%s" % (device_string, device_id)] += data
 
             for extractor in EXTRACTORS:

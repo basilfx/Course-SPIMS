@@ -15,12 +15,12 @@ class SHA256Gen:
 		processed = self.sha256.update(struct.pack('I', merged(input)))
 		input[self.index] = processed
 		return processed
-		
+
 # Generates a random number by applying the AES counter cipher to the
 # sequence of extracted inputs
 class AES128CtrGen:
 	name = "aes128_ctr"
-	
+
 	def __init__(self, input):
 		self.input = input
 		self.counter = 0
