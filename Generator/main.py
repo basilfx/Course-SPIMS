@@ -76,7 +76,6 @@ def main(argv):
                         data = struct.pack(formatting, first, second, third)
 
                         # Store it
-                        print data
                         device_data_dict["%s_%s" % (device_string, device_id)] += data
 
             for extractor in EXTRACTORS:
