@@ -7,6 +7,9 @@ import functools
 
 aes_key = int("926E99A7AEF8C57456CAE8A99ABB6A9C58677CC6CE3E877E5CAE", 16)
 
+#
+# Begin of decorators
+#
 def structurize(func=None, bytes=4, fmt_in="I", fmt_out="I"):
 	# Next time we'll be decorating method
 	if func is None:
@@ -34,13 +37,35 @@ def consume(func=None, bytes=4):
 	# Done
 	return func
 
+#
+# Actual extractors
+#
 @structurize(bytes=8, fmt_in="II", fmt_out="Q")
 def test(input):
+	"""
+	Consume a chunk of 8 bytes, convert it into two unsigned integers. Then, add
+	the two numbers and return a unsigned long. This will produce 8 bytes again.
+
+	input[0] == first integer
+	input[1] == second integer
+	input[2] -> raises IndexError
+	"""
+
 	# Sum two integers from 8 bytes of input
 	return input[0] + input[1]
 
 @consume(bytes=6)
 def test2(input):
+	"""
+	Consume a chunk of 6 bytes, duplicate them and return 12 bytes.
+
+	input[0] == first byte
+	input[1] == second byte
+	...
+	input[5] == sixth byte
+	input[6] -> raises IndexError
+	"""
+
 	# Return 12 bytes
 	return input + input
 

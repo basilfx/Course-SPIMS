@@ -14,19 +14,17 @@ class SHA256Gen:
 
 	def get_rand(self):
 		item = self.input[self.index]
-		hx = '%x' % item
-		bytes = ('0'*(len(hx) % 2) + hx).decode('hex')
-		self.sha256.update(bytes)
-		processed = int(self.sha256.hexdigest(), 16)
+		self.sha256.update(item)
+		processed = self.sha256.hexdigest()
 		self.input[self.index] = processed
 		self.index = (self.index + 1) % len(self.input)
 		return processed
-		
+
 # Generates a random number by applying the AES counter cipher to the
 # sequence of extracted inputs
 class AES128CtrGen:
 	name = "aes128_ctr"
-	
+
 	def __init__(self, input):
 		self.input = input
 		self.counter = 0
