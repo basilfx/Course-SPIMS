@@ -5,6 +5,7 @@ import sys
 import glob
 import os
 import collections
+import struct
 
 # Extractors are transformations that attempt to extract
 # randomness from non-randomness in entropy sources
@@ -53,7 +54,7 @@ def main(argv):
             # Skip comment line
             next(input_file)
 
-            device_data_dict = collections.defaultdict(str)
+            device_data_dict = collections.defaultdict(list)
 
             for line in input_file:
                 if ";" in line:
@@ -65,10 +66,10 @@ def main(argv):
 
                         # Float to ints
                         data = struct.pack("fff", first, second, third)
-                        #data = struct.unpack("III", data)
+                        data = struct.unpack("III", data)
 
                         # Store it
-                        device_data_dict["%s_%s" % (device_string, device_id)] += data
+                        device_data_dict["{}_{}".format(device_string, device_id)] += data
 
             for extractor in EXTRACTORS:
                 for generator in GENERATORS:
@@ -82,22 +83,17 @@ def main(argv):
                         os.makedirs(current_output_dir)
 
                     # Iterate over each device
-                    for device, data in device_data_dict.iteritems():
+                    for device, data in device_data_dict.items():
                         current_device_file = os.path.join(current_output_dir, "%s.txt" % device)
+                        data = zip(*[iter(data)]*3)
 
                         with open(current_device_file, "w+") as output_file:
-                            # Grab extractor properties
-                            input_size = getattr(extractor, "input_size", 4)
+                            # Call extractor then generator
+                            gen = generator(extractor(data))
 
-                            # Iterate over each N bytes
-                            for bytes in chunks(data, input_size):
-                                if len(bytes) == input_size:
-                                    # Call extractor then generator
-                                    gen = generator.__init__(extractor(bytes))
-
-                                    for i in range(NUMBERS_OUTPUT_SIZE):
-                                        # Write output to file
-                                        output_file.write(gen.get_rand())
+                            for i in range(NUMBERS_OUTPUT_SIZE):
+                                # Write output to file
+                                output_file.write(str(gen.get_rand()))
 
     # Done
     return 0

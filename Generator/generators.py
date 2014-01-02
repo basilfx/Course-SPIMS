@@ -1,5 +1,6 @@
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
+import struct
 
 # Generates a random number by making a number of the SHA-256
 # hash for each of the extracted inputs
@@ -9,11 +10,16 @@ class SHA256Gen:
 	def __init__(self, input):
 		self.input = input
 		self.sha256 = SHA256.new()
+		self.index = 0
 
 	def get_rand(self):
-		item = input[self.index % len(input)]
-		processed = self.sha256.update(struct.pack('I', merged(input)))
-		input[self.index] = processed
+		item = self.input[self.index]
+		hx = '%x' % item
+		bytes = ('0'*(len(hx) % 2) + hx).decode('hex')
+		self.sha256.update(bytes)
+		processed = int(self.sha256.hexdigest(), 16)
+		self.input[self.index] = processed
+		self.index = (self.index + 1) % len(self.input)
 		return processed
 		
 # Generates a random number by applying the AES counter cipher to the
