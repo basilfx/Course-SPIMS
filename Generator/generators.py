@@ -13,15 +13,16 @@ class SHA256Gen:
 
 	def __init__(self, input):
 		self.input = input
+		self.input_length = len(input)
 		self.sha256 = SHA256.new()
 		self.index = 0
 
 	def get_rand(self):
 		item = self.input[self.index]
 		self.sha256.update(item)
-		processed = self.sha256.hexdigest().decode("hex")
+		processed = struct.pack('B', reduce(lambda bytes, byte: bytes ^ byte, map(lambda byte: ord(byte), self.sha256.hexdigest().decode("hex"))))
 		self.input[self.index] = processed
-		self.index = (self.index + 1) % len(self.input)
+		self.index = (self.index + 1) % self.input_length
 		return processed
 
 # Generates a random number by applying the AES counter cipher to the
@@ -31,13 +32,14 @@ class AES128CtrGen:
 
 	def __init__(self, input):
 		self.input = input
+		self.input_length = len(input)
 		self.counter = 0
 		self.aes = AES.new(aes_key, AES.MODE_CTR, counter = lambda: struct.pack("Q", self.counter) + ("\x00" * 8))
 
 	def get_rand(self):
-		item = self.input[self.counter % len(self.input)]
+		item = self.input[self.counter % self.input_length]
 		processed = self.aes.encrypt(item)
-		self.counter = self.counter + 1 % len(self.input)
+		self.counter = self.counter + 1 % self.input_length
 		return processed
 
 # Generates random numbers by using the OpenSSL pseudorandom number
@@ -50,7 +52,7 @@ class OpenSSLPRNGen:
 		self.prng.seed("".join(input))
 
 	def get_rand(self):
-		return self.prng.bytes(8)
+		return self.prng.bytes(1)
 
 	def reset(self):
 		self.prng.cleanup()
