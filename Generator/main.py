@@ -112,7 +112,7 @@ def main(argv):
                         if not os.path.exists(current_output_dir):
                             os.makedirs(current_output_dir)
 
-                        with open(current_device_file, "wb+") as output_file:
+                        with open(current_device_file, "wb") as output_file:
                             before = data[0], data[1], data[-1], data[-2], len(data)
 
                             # Call generator
