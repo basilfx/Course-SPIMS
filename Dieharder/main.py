@@ -6,6 +6,7 @@ import pipes
 import multiprocessing
 import subprocess
 import formic
+import os
 
 def main(argv):
     if len(argv) not in [2, 3]:
@@ -39,12 +40,24 @@ def main(argv):
 
 def run_job(file_name):
     output_file = file_name.rsplit(".", 1)[0] + ".diehard"
-    command = ["dieharder", "-a", "-f", pipes.quote(file_name), "-g", "201", ">", pipes.quote(output_file)]
-    sys.stdout.write("Executing command: %s\n" % (" ".join(command)))
+
+    # Remove old file since we concatenate
+    if os.path.exists(output_file):
+        os.remove(output_file)
+
+    tests = [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13, 15, 16, 100, 101, 102]
+    pre_cmd = ["dieharder", "-a", "-f", pipes.quote(file_name), "-g", "201"]
+    post_cmd = ["-D", "default", "-D", "histogram", ">>", pipes.quote(output_file)]
 
     # Run command
+    sys.stdout.write("Job starting for file: %s\n" % file_name)
+
     start = datetime.now()
-    retval = subprocess.call(" ".join(command), shell=True)
+
+    for test in tests:
+        command = pre_cmd + ["-d", str(test)] + post_cmd
+        subprocess.call(" ".join(command), shell=True)
+
     end = datetime.now()
 
     sys.stdout.write("Job result: %d\n" % retval)
