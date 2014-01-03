@@ -1,41 +1,53 @@
+from datetime import datetime
+
 import sys
 import glob
 import os
 import multiprocessing
-
 import subprocess
 
 def main(argv):
-    if len(argv) != 3:
-        sys.stdout.write("Syntax: %s <input_dir> <output_dir>\n" % argv[0])
+    if len(argv) not in [3, 4]:
+        sys.stdout.write("Syntax: %s <input_dir> <output_dir> [<cpus>]\n" % argv[0])
         return 1
 
-    global input_dir
+    # Parse arguments
     input_dir = os.path.abspath(argv[1])
-    global output_dir
     output_dir = os.path.abspath(argv[2])
-    file_names = glob.glob(os.path.join(input_dir, "*"))
 
+    try:
+        cpus = int(argv[3])
+    except (LookupError, ValueError)
+        cpus = multiprocessing.cpu_count()
+
+    # Find files
+    file_names = glob.glob(os.path.join(input_dir, "*"))
     sys.stdout.write("Found %d files\n" % len(file_names))
 
-    
-    count = multiprocessing.cpu_count()
-    pool = multiprocessing.Pool(processes=count)
+    # Create a pool
+    pool = multiprocessing.Pool(processes=cpus)
+    r = pool.map_async(lambda x: run_job(x, output_dir), file_names)
 
-    r = pool.map_async(run_job, file_names)
+    # Wait for completion
     r.wait()
+    sys.stdout.write("Done!\n")
 
-    print "done"
     # Done
     return 0
 
 
-def run_job(file_name):
+def run_job(file_name, output_dir):
     output_file = os.path.join(output_dir, os.path.basename(file_name))
     command = ["dieharder", "-a", "-f", file_name, "-g", "201", ">", output_file]
-    print "Executing: " + " ".join(command)
-    subprocess.call(" ".join(command), shell=True)
+    sys.stdout.write("Executing command: %s\n" % (" ".join(command)))
 
-# E.g. `python main.py ../Results/upload output'
+    # Run command
+    start = datetime.now()
+    subprocess.call(" ".join(command), shell=True)
+    end = datetime.now()
+
+    sys.stdout.write("Job time: %s\n" % (start - end))
+
+# E.g. `python main.py ../Results/upload output 4'
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
