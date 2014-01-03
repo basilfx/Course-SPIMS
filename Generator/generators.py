@@ -19,7 +19,7 @@ class SHA256Gen:
 	def get_rand(self):
 		item = self.input[self.index]
 		self.sha256.update(item)
-		processed = self.sha256.hexdigest()
+		processed = self.sha256.hexdigest().decode("hex")
 		self.input[self.index] = processed
 		self.index = (self.index + 1) % len(self.input)
 		return processed
@@ -50,4 +50,7 @@ class OpenSSLPRNGen:
 		self.prng.seed("".join(input))
 
 	def get_rand(self):
-		self.prng.bytes(8)
+		return self.prng.bytes(8)
+
+	def reset(self):
+		self.prng.cleanup()
