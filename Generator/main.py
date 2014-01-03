@@ -10,10 +10,10 @@ import struct
 # Extractors are transformations that attempt to extract
 # randomness from non-randomness in entropy sources
 EXTRACTORS = [
-#    raw,
-#    merged,
+    raw,
+    merged,
     von_neumann2,
-#    aes128_cbc_mac
+    aes128_cbc_mac
 ]
 
 # Generators take entropy and generate random numbers
@@ -91,28 +91,30 @@ def main(argv):
             # Stats
             sys.stdout.write("Read %d lines of data for '%s'\n" % (lines, device_key))
 
-            # Apply generators and extractors
-            for extractor in EXTRACTORS:
-                for generator in GENERATORS:
+            # Iterate over each device
+            for device, data in device_data_dict.iteritems():
+                # Apply generators and extractors
+                for extractor in EXTRACTORS:
                     ext_name = extractor.__name__
-                    gen_name = generator.name
 
-                    # Create output directory
-                    current_output_dir = os.path.join(output_dir, ext_name, gen_name)
+                    # Apply extractor
+                    new_data = extractor(data)
 
-                    if not os.path.exists(current_output_dir):
-                        os.makedirs(current_output_dir)
+                    for generator in GENERATORS:
+                        gen_name = generator.name
 
-                    # Iterate over each device
-                    for device, data in device_data_dict.iteritems():
                         sys.stdout.write("Generating for '%s' with extractor '%s' and generator '%s'\n" % (device, ext_name, gen_name))
 
+                        # Create output directory and output file
+                        current_output_dir = os.path.join(output_dir, ext_name, gen_name)
                         current_device_file = os.path.join(current_output_dir, "%s.txt" % device)
-                        #data = zip(*[iter(data)]*3)
+
+                        if not os.path.exists(current_output_dir):
+                            os.makedirs(current_output_dir)
 
                         with open(current_device_file, "wb+") as output_file:
-                            # Call extractor then generator
-                            gen = generator(extractor(data))
+                            # Call generator
+                            gen = generator(new_data)
 
                             for i in range(NUMBERS_OUTPUT_SIZE):
                                 # Write output to file
