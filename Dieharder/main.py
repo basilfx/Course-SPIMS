@@ -46,7 +46,7 @@ def run_job(file_name):
         os.remove(output_file)
 
     tests = [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13, 15, 16, 100, 101, 102]
-    pre_cmd = ["dieharder", "-a", "-f", pipes.quote(file_name), "-g", "201"]
+    pre_cmd = ["dieharder", "-f", pipes.quote(file_name), "-g", "201"]
     post_cmd = ["-D", "default", "-D", "histogram", ">>", pipes.quote(output_file)]
 
     # Run command
