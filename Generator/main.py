@@ -52,6 +52,9 @@ def main(argv):
             if file_type == "# General":
                 mapper = float
                 formatting = "fff"
+            if file_type == "# GeneralV2":
+                mapper = int
+                formatting = "iii"
             elif file_type == "# Raw":
                 mapper = int
                 formatting = "hhh"
@@ -76,7 +79,6 @@ def main(argv):
                         data = struct.pack(formatting, first, second, third)
 
                         # Store it
-                        print data
                         device_data_dict["%s_%s" % (device_string, device_id)] += data
 
             for extractor in EXTRACTORS:
@@ -92,8 +94,10 @@ def main(argv):
 
                     # Iterate over each device
                     for device, data in device_data_dict.items():
+                        sys.stdout.write("Generating for '%s' with extractor '%s' and generator '%s'\n" % (device, ext_name, gen_name))
+
                         current_device_file = os.path.join(current_output_dir, "%s.txt" % device)
-                        #data = zip(*[iter(data)]*3) 
+                        #data = zip(*[iter(data)]*3)
 
                         with open(current_device_file, "w+") as output_file:
                             # Call extractor then generator
