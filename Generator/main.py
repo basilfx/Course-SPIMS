@@ -12,7 +12,7 @@ import struct
 EXTRACTORS = [
     raw,
     merged,
-    von_neumann,
+#    von_neumann,
     aes128_cbc_mac
 ]
 
@@ -24,7 +24,7 @@ GENERATORS = [
 ]
 
 # Defines the number of random numbers that must be generated
-NUMBERS_OUTPUT_SIZE = 5000000
+NUMBERS_OUTPUT_SIZE = 2500000
 
 # Include gyro data or not
 INCLUDE_GYRO = False
@@ -71,6 +71,7 @@ def main(argv):
 
             device_data_dict = collections.defaultdict(list)
             device_key = "%s_%s" % (device_string, device_id)
+            lines = 0
 
             # Read data lines
             for line in input_file:
@@ -84,6 +85,8 @@ def main(argv):
                     result = map(mapper, line.split(";")[1:])
 
                     if result:
+                        lines += 1
+
                         # Unpack a line
                         first, second, third = result
                         # Convert to bytes
@@ -93,7 +96,7 @@ def main(argv):
                         device_data_dict[device_key] += data
 
             # Stats
-            sys.stdout.write("Read %d lines of data for '%s'\n" % (len(device_data_dict[device_key]), device_key))
+            sys.stdout.write("Read %d lines of data for '%s'\n" % (lines, device_key))
 
             # Apply generators and extractors
             for extractor in EXTRACTORS:
@@ -108,13 +111,13 @@ def main(argv):
                         os.makedirs(current_output_dir)
 
                     # Iterate over each device
-                    for device, data in device_data_dict.items():
+                    for device, data in device_data_dict.iteritems():
                         sys.stdout.write("Generating for '%s' with extractor '%s' and generator '%s'\n" % (device, ext_name, gen_name))
 
                         current_device_file = os.path.join(current_output_dir, "%s.txt" % device)
                         #data = zip(*[iter(data)]*3)
 
-                        with open(current_device_file, "w+") as output_file:
+                        with open(current_device_file, "wb+") as output_file:
                             # Call extractor then generator
                             gen = generator(extractor(data))
 

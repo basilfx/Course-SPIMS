@@ -43,6 +43,9 @@ def von_neumann(inp):
 	del bytes[-1]
 	return map(lambda b: BitArray(bin=b).bytes, bytes)
 
+def von_neumann2(inp):
+	pass
+
 # Applies AES-CBC to each of the inputs in sequence
 def aes128_cbc_mac(input):
 	aes = AES.new(aes_key, AES.MODE_CBC, aes_iv)
