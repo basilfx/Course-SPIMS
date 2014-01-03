@@ -122,6 +122,8 @@ def main(argv):
                                 # Write output to file
                                 output_file.write(str(gen.get_rand()))
 
+                            if type(gen) == type(OpenSSLPRNGen):
+                                gen.reset()
     # Done
     return 0
 

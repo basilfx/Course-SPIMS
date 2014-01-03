@@ -50,4 +50,7 @@ class OpenSSLPRNGen:
 		self.prng.seed("".join(input))
 
 	def get_rand(self):
-		self.prng.bytes(8)
+		return self.prng.bytes(8)
+
+	def reset(self):
+		self.prng.cleanup()
