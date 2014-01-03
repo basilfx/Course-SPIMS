@@ -98,7 +98,7 @@ def main(argv):
                     ext_name = extractor.__name__
 
                     # Apply extractor
-                    new_data = extractor(data)
+                    data = extractor(data)
 
                     for generator in GENERATORS:
                         gen_name = generator.name
@@ -113,12 +113,17 @@ def main(argv):
                             os.makedirs(current_output_dir)
 
                         with open(current_device_file, "wb+") as output_file:
+                            before = data[0], data[1], data[-1], data[-2], len(data)
+
                             # Call generator
-                            gen = generator(new_data)
+                            gen = generator(data)
 
                             for i in range(NUMBERS_OUTPUT_SIZE):
                                 # Write output to file
                                 output_file.write(str(gen.get_rand()))
+
+                            after = data[0], data[1], data[-1], data[-2], len(data)
+                            assert after == before
 
                             if type(gen) == type(OpenSSLPRNGen):
                                 gen.reset()
