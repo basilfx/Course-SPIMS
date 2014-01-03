@@ -1,5 +1,5 @@
 # Raw
-Raw device
+Raw device 4G 250 256
 1290717848
 # ACCELEROMETER
 25095
