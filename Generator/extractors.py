@@ -20,7 +20,7 @@ def merged(inp):
 
 # Applies an iterated Von Neumann extractor to the input values' dimensions
 def von_neumann(inp):
-	bitstr = reduce(lambda s, i: s+bin(ord(i))[2:], inp)
+	bitstr = reduce(lambda s, i: s +  "".join([bin(ord(j))[2:] for j in i]), inp)
 
 	output = ""
 	while len(bitstr) > 1:
@@ -40,6 +40,7 @@ def von_neumann(inp):
 		bitstr = bitstr[2:]
 
 	bytes = [output[x:x+8] for x in range(0, len(output), 8)]
+	del bytes[-1]
 	return map(lambda b: BitArray(bin=b).bytes, bytes)
 
 # Applies AES-CBC to each of the inputs in sequence
