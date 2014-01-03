@@ -10,10 +10,10 @@ import struct
 # Extractors are transformations that attempt to extract
 # randomness from non-randomness in entropy sources
 EXTRACTORS = [
-    raw,
-    merged,
-#    von_neumann,
-    aes128_cbc_mac
+#    raw,
+#    merged,
+    von_neumann2,
+#    aes128_cbc_mac
 ]
 
 # Generators take entropy and generate random numbers
@@ -28,13 +28,6 @@ NUMBERS_OUTPUT_SIZE = 2500000
 
 # Include gyro data or not
 INCLUDE_GYRO = False
-
-def chunks(l, n):
-    """
-    Yield successive n-sized chunks from l.
-    """
-    for i in xrange(0, len(l), n):
-        yield l[i:i+n]
 
 def main(argv):
     if len(argv) != 3:

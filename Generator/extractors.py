@@ -43,8 +43,54 @@ def von_neumann(inp):
 	del bytes[-1]
 	return map(lambda b: BitArray(bin=b).bytes, bytes)
 
+# Optimized version of the above Von Neumann
 def von_neumann2(inp):
-	pass
+	remaining = ""
+	remaining_length = [0]
+
+	def bits_iterator():
+		for byte in inp:
+			bits = "{0:8b}".format(ord(byte))
+
+			yield bits[0:2]
+			yield bits[2:4]
+			yield bits[4:6]
+			yield bits[6:8]
+
+		i = 0
+		while remaining_length[0] > 1:
+			yield remaining[i:i+2]
+			i += 2
+			remaining_length[0] -= 2
+
+	output = []
+	bit_output = ""
+	bit_count = 0
+
+	for current_scope in bits_iterator():
+		if current_scope == "01":
+			bit_output += "0"
+			bit_count += 1
+
+			remaining += "1"
+		elif current_scope == "10":
+			bit_output += "1"
+			bit_count += 1
+
+			remaining += "0"
+		elif current_scope == "00":
+			remaining += "0"
+		elif current_scope == "11":
+			remaining += "1"
+
+		remaining_length[0] += 1
+
+		if bit_count == 8:
+			output += [chr(int(bit_output, 2))]
+			bit_output = ""
+			bit_count = 0
+
+	return output
 
 # Applies AES-CBC to each of the inputs in sequence
 def aes128_cbc_mac(input):
