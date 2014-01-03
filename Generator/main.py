@@ -24,7 +24,7 @@ GENERATORS = [
 ]
 
 # Defines the number of random numbers that must be generated
-NUMBERS_OUTPUT_SIZE = 2500000
+NUMBERS_OUTPUT_SIZE = 5000000
 
 # Include gyro data or not
 INCLUDE_GYRO = False
