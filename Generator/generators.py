@@ -26,6 +26,50 @@ class SHA256Gen:
 		self.index = (self.index + 1) % self.input_length
 		return processed
 
+# Generates a random number by making a number of the SHA-256
+# hash for each of the extracted inputs
+class SHA256GenV2:
+	name = "sha256v2"
+
+	def __init__(self, input):
+		self.input = input
+		self.next = []
+		self.input_length = len(input)
+		self.sha256 = SHA256.new()
+		self.index = 0
+
+		self.get_rand = self._a
+
+	def _a(self):
+		self.sha256.update(self.input[self.index])
+
+		processed = 0
+		for byte in bytearray(self.sha256.digest()):
+			processed ^= byte
+		processed = chr(processed)
+
+		self.next += [processed]
+		self.index += 1
+
+		if self.index == self.input_length:
+			self.get_rand = self._b
+			self.index = 0
+
+		return processed
+
+	def _b(self):
+		self.sha256.update(self.next[self.index])
+
+		processed = 0
+		for byte in bytearray(self.sha256.digest()):
+			processed ^= byte
+		processed = chr(processed)
+
+		self.next[self.index] = processed
+		self.index = (self.index + 1) % self.input_length
+
+		return processed
+
 # Generates a random number by applying the AES counter cipher to the
 # sequence of extracted inputs
 class AES128CtrGen:
@@ -50,10 +94,8 @@ class OpenSSLPRNGen:
 
 	def __init__(self, input):
 		self.prng = rand
+		self.prng.cleanup()
 		self.prng.seed("".join(input))
 
 	def get_rand(self):
 		return self.prng.bytes(1)
-
-	def reset(self):
-		self.prng.cleanup()

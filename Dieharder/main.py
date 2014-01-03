@@ -60,7 +60,6 @@ def run_job(file_name):
 
     end = datetime.now()
 
-    sys.stdout.write("Job result: %d\n" % retval)
     sys.stdout.write("Job time: %s\n" % (end - start))
 
 # E.g. `python main.py ../Results/upload 4'
