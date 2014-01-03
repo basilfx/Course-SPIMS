@@ -26,6 +26,9 @@ GENERATORS = [
 # Defines the number of random numbers that must be generated
 NUMBERS_OUTPUT_SIZE = 5000000
 
+# Include gyro data or not
+INCLUDE_GYRO = False
+
 def chunks(l, n):
     """
     Yield successive n-sized chunks from l.
@@ -67,8 +70,16 @@ def main(argv):
             next(input_file)
 
             device_data_dict = collections.defaultdict(list)
+            device_key = "%s_%s" % (device_string, device_id)
 
+            # Read data lines
             for line in input_file:
+                line = line.strip()
+
+                # Stop at gyro data if it is configured to not be included
+                if INCLUDE_GYRO == False and line == "# GYRO":
+                    break
+
                 if ";" in line:
                     result = map(mapper, line.split(";")[1:])
 
@@ -79,8 +90,12 @@ def main(argv):
                         data = struct.pack(formatting, first, second, third)
 
                         # Store it
-                        device_data_dict["%s_%s" % (device_string, device_id)] += data
+                        device_data_dict[device_key] += data
 
+            # Stats
+            sys.stdout.write("Read %d lines of data for '%s'\n" % (len(device_data_dict[device_key]), device_key))
+
+            # Apply generators and extractors
             for extractor in EXTRACTORS:
                 for generator in GENERATORS:
                     ext_name = extractor.__name__

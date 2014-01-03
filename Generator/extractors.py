@@ -3,7 +3,7 @@ from Crypto.Cipher import AES
 # Formats the raw input values by concatenating the number strings
 def raw(input):
 	return input
-	
+
 # XORs the raw input value dimensions together
 def merged(input):
 	return map(lambda x: x[0] ^ x[1] ^ x[2], zip(*[iter(data)]*3))
