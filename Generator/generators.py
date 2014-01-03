@@ -20,7 +20,7 @@ class SHA256Gen:
 	def get_rand(self):
 		item = self.input[self.index]
 		self.sha256.update(item)
-		processed = self.sha256.hexdigest().decode("hex")
+		processed = struct.pack('B', reduce(lambda bytes, byte: bytes ^ byte, map(lambda byte: ord(byte), self.sha256.hexdigest().decode("hex"))))
 		self.input[self.index] = processed
 		self.index = (self.index + 1) % self.input_length
 		return processed
