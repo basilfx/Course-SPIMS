@@ -59,14 +59,16 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private boolean uploading;
 	
 	private List<Long> valuesAccT;
-	private List<Float> valuesAccX;
-	private List<Float> valuesAccY;
-	private List<Float> valuesAccZ;
+	private List<Integer> valuesAccX;
+	private List<Integer> valuesAccY;
+	private List<Integer> valuesAccZ;
 	
 	private List<Long> valuesGyroT;
-	private List<Float> valuesGyroX;
-	private List<Float> valuesGyroY;
-	private List<Float> valuesGyroZ;
+	private List<Integer> valuesGyroX;
+	private List<Integer> valuesGyroY;
+	private List<Integer> valuesGyroZ;
+	
+	private long count;
 	
 	private long sessionId = (long) (Math.random() * Long.MAX_VALUE); 
 	
@@ -75,6 +77,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private Button buttonGo;
 	private Button buttonRaw;
 	private TextView textResult;
+	private TextView textCount;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -82,15 +85,15 @@ public class MainActivity extends Activity implements SensorEventListener {
 		setContentView(R.layout.activity_main);
 		
 		// Initialize lists
-		this.valuesAccT = new ArrayList<Long>(1200);
-		this.valuesAccX = new ArrayList<Float>(1200);
-		this.valuesAccY = new ArrayList<Float>(1200);
-		this.valuesAccZ = new ArrayList<Float>(1200);
+		this.valuesAccT = new ArrayList<Long>(2500);
+		this.valuesAccX = new ArrayList<Integer>(2500);
+		this.valuesAccY = new ArrayList<Integer>(2500);
+		this.valuesAccZ = new ArrayList<Integer>(2500);
 		
-		this.valuesGyroT = new ArrayList<Long>(600);
-		this.valuesGyroX = new ArrayList<Float>(600);
-		this.valuesGyroY = new ArrayList<Float>(600);
-		this.valuesGyroZ = new ArrayList<Float>(600);
+		this.valuesGyroT = new ArrayList<Long>(1500);
+		this.valuesGyroX = new ArrayList<Integer>(1500);
+		this.valuesGyroY = new ArrayList<Integer>(1500);
+		this.valuesGyroZ = new ArrayList<Integer>(1500);
 		
 		this.uploading = false;
 		
@@ -99,6 +102,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		this.buttonGo = (Button) this.findViewById(R.id.buttonGo);
 		this.buttonRaw = (Button) this.findViewById(R.id.buttonRaw);
 		this.textResult = (TextView) this.findViewById(R.id.textResult);
+		this.textCount = (TextView) this.findViewById(R.id.textCount);
 		
 		this.buttonGo.setOnClickListener(new OnClickListener() {
 			@Override
@@ -148,13 +152,14 @@ public class MainActivity extends Activity implements SensorEventListener {
 								stream.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\"result.txt\"" + "\r\n");
 								stream.writeBytes("\r\n");
 								
-								stream.writeBytes("# General\n");
+								stream.writeBytes("# GeneralV2\n");
 								stream.writeBytes(Build.MODEL + "\n");
 								stream.writeBytes(sessionId + "\n");
 								
 								// Write each accelerometer value
 								stream.writeBytes("# ACCELEROMETER\n");
 								stream.writeBytes(valuesAccT.size() + "\n");
+								
 								
 								for (int i = 0; i < valuesAccT.size(); i++) {
 									stream.writeBytes(valuesAccT.get(i) + ";");
@@ -183,6 +188,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 								int responseCode = connection.getResponseCode();
 								String responseMessage = connection.getResponseMessage();
 								
+								if (responseCode < 400) {
+									throw new IOException("Bad HTTP status");
+								}
+								
 								Log.d(this.getClass().getName(),  "Response code: " + responseCode);
 								Log.d(this.getClass().getName(),  "Message: " + responseMessage);
 							} catch (IOException e) {
@@ -204,6 +213,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 							valuesGyroX.clear();
 							valuesGyroY.clear();
 							valuesGyroZ.clear();
+							
+							count = 0;
 							
 							// Re-enable upload button
 							MainActivity.this.runOnUiThread(new Runnable() {
@@ -310,17 +321,23 @@ public class MainActivity extends Activity implements SensorEventListener {
 			
 			if (paramSensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
 				this.valuesGyroT.add(paramSensorEvent.timestamp);
-				this.valuesGyroX.add(f1);
-				this.valuesGyroY.add(f2);
-				this.valuesGyroZ.add(f3);
+				this.valuesGyroX.add(Float.floatToRawIntBits(f1));
+				this.valuesGyroY.add(Float.floatToRawIntBits(f2));
+				this.valuesGyroZ.add(Float.floatToRawIntBits(f3));
 	
 				return;
 			}
 		
 			this.valuesAccT.add(paramSensorEvent.timestamp);
-			this.valuesAccX.add(f1);
-			this.valuesAccY.add(f2);
-			this.valuesAccZ.add(f3);
+			this.valuesAccX.add(Float.floatToRawIntBits(f1));
+			this.valuesAccY.add(Float.floatToRawIntBits(f2));
+			this.valuesAccZ.add(Float.floatToRawIntBits(f3));
+			
+			count++;
+			
+			if (count % 100 == 0) {
+				this.textCount.setText(count + "");
+			}
 		}
 		
 		if (this.buttonGo.isEnabled() == false) { 

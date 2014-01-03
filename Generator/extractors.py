@@ -9,7 +9,7 @@ aes_iv ="e25cac42e472c1a6bc8143959d9cb014".decode("hex")
 # Formats the raw input values by concatenating the number strings
 def raw(inp):
 	return inp
-	
+
 # XORs the raw input value dimensions together
 def merged(inp):
 	res = list()
