@@ -31,7 +31,7 @@ GENERATORS = [
 NUMBERS_OUTPUT_SIZE = 5000000 * 5
 
 # Include gyro data or not
-INCLUDE_GYRO = False
+INCLUDE_GYRO = True
 
 def spawn(f):
     def fun(q_in,q_out):
