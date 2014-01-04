@@ -8,6 +8,8 @@ import collections
 import struct
 import multiprocessing
 import errno
+import time
+import random
 
 # Extractors are transformations that attempt to extract
 # randomness from non-randomness in entropy sources
@@ -130,6 +132,7 @@ def main(argv):
     # Iterate over each device
     #for device, data in device_data_dict.iteritems():
     def _run(device):
+        time.sleep(random.random())
         data = device_data_dict[device]
 
         # Apply generators and extractors
@@ -149,14 +152,14 @@ def main(argv):
                 current_device_file = os.path.join(current_output_dir, "%s.txt" % device)
 
                 # Try to create directory
-                try:
-                    if not os.path.exists(current_output_dir):
+                if not os.path.exists(current_output_dir):
+                    try:
                         os.makedirs(current_output_dir)
-                except OSError as e:
-                    if e.errno == errno.EEXIST and os.path.isdir(path):
-                        pass
-                    else:
-                        raise
+                    except OSError as e:
+                        if e.errno == errno.EEXIST and os.path.isdir(current_output_dir):
+                            pass
+                        else:
+                            raise
 
                 with open(current_device_file, "a+b", 1024*1024*1024) as output_file:
                     # Call generator
