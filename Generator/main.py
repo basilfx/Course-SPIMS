@@ -6,6 +6,8 @@ import glob
 import os
 import collections
 import struct
+import multiprocessing
+import errno
 
 # Extractors are transformations that attempt to extract
 # randomness from non-randomness in entropy sources
@@ -29,13 +31,45 @@ NUMBERS_OUTPUT_SIZE = 5000000 * 5
 # Include gyro data or not
 INCLUDE_GYRO = False
 
+def spawn(f):
+    def fun(q_in,q_out):
+        while True:
+            i,x = q_in.get()
+            if i is None:
+                break
+            q_out.put((i,f(x)))
+    return fun
+
+def parmap(f, X, nprocs = multiprocessing.cpu_count()):
+    q_in   = multiprocessing.Queue(1)
+    q_out  = multiprocessing.Queue()
+
+    proc = [multiprocessing.Process(target=spawn(f),args=(q_in,q_out)) for _ in range(nprocs)]
+    for p in proc:
+        p.daemon = True
+        p.start()
+
+    sent = [q_in.put((i,x)) for i,x in enumerate(X)]
+    [q_in.put((None,None)) for _ in range(nprocs)]
+    res = [q_out.get() for _ in range(len(sent))]
+
+    [p.join() for p in proc]
+
+    return [x for i,x in sorted(res)]
+
 def main(argv):
-    if len(argv) != 3:
-        sys.stdout.write("Syntax: %s <input_dir> <output_dir>\n" % argv[0])
+    if len(argv) not in [3, 4]:
+        sys.stdout.write("Syntax: %s <input_dir> <output_dir> [<cpus>]\n" % argv[0])
         return 1
 
+    # Parse arguments
     input_dir = os.path.abspath(argv[1])
     output_dir = os.path.abspath(argv[2])
+
+    try:
+        cpus = int(argv[2])
+    except (LookupError, ValueError):
+        cpus = multiprocessing.cpu_count()
 
     file_names = glob.glob(os.path.join(input_dir, "*.txt"))
     device_data_dict = collections.defaultdict(list)
@@ -94,7 +128,10 @@ def main(argv):
         sys.stdout.write("Read %d lines of data for '%s' in memory\n" % (lines, device_key))
 
     # Iterate over each device
-    for device, data in device_data_dict.iteritems():
+    #for device, data in device_data_dict.iteritems():
+    def _run(device):
+        data = device_data_dict[device]
+
         # Apply generators and extractors
         for extractor in EXTRACTORS:
             ext_name = extractor.__name__
@@ -111,8 +148,15 @@ def main(argv):
                 current_output_dir = os.path.join(output_dir, ext_name, gen_name)
                 current_device_file = os.path.join(current_output_dir, "%s.txt" % device)
 
-                if not os.path.exists(current_output_dir):
-                    os.makedirs(current_output_dir)
+                # Try to create directory
+                try:
+                    if not os.path.exists(current_output_dir):
+                        os.makedirs(current_output_dir)
+                except OSError as e:
+                    if e.errno == errno.EEXIST and os.path.isdir(path):
+                        pass
+                    else:
+                        raise
 
                 with open(current_device_file, "a+b", 1024*1024*1024) as output_file:
                     # Call generator
@@ -121,6 +165,10 @@ def main(argv):
                     for i in xrange(NUMBERS_OUTPUT_SIZE):
                         # Write to file
                         output_file.write(gen.get_rand())
+
+    # Spawn several processes
+    parmap(_run, device_data_dict.keys(), min(cpus, len(device_data_dict)))
+
     # Done
     return 0
 
