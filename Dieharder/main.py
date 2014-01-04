@@ -45,7 +45,7 @@ def run_job(file_name):
     if os.path.exists(output_file):
         os.remove(output_file)
 
-    tests = [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13, 15, 16, 17, 100, 101, 102, 200, 201, 205]
+    tests = [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13, 15, 16, 17, 100, 101, 102, 201, 204, 205]
     pre_cmd = ["dieharder", "-f", pipes.quote(file_name), "-g", "201"]
     post_cmd = ["-D", "default", "-D", "histogram", ">>", pipes.quote(output_file)]
 
