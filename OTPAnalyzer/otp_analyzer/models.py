@@ -4,6 +4,8 @@ class Record(models.Model):
     model = models.CharField(max_length=64)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    duration = models.IntegerField()
+    duration_round = models.FloatField()
     session_id = models.BigIntegerField()
 
     sensor_da2_max = models.FloatField()

@@ -43,7 +43,11 @@ class Command(BaseCommand):
                     row = { Command.remap[x]: y[0] for x, y in row.items() }
                 except KeyError:
                     # We let it fail when we try to save it
-                    pass
+                    continue
+
+                # Add extra fields
+                row["duration"] = int(row["end_time"]) - int(row["start_time"])
+                row["duration_round"] = float(row["duration"]) / float(row["rounds"])
 
                 # Put it in a form
                 form = RecordImportForm(data=row)

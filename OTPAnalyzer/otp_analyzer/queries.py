@@ -6,6 +6,9 @@ from otp_analyzer.models import Record
 import numpy as np
 import pylab
 
+def affix_space(inp, count):
+    return (inp + (" " * count))[:count]
+
 def get_distinct_models():
     return Record.objects \
                  .distinct() \
@@ -20,15 +23,22 @@ def get_records_per_model(**lookups):
                  .annotate(avg_min_ax=Avg("min_ax"), avg_min_ay=Avg("min_ay"), avg_min_az=Avg("min_az")) \
                  .annotate(max_max_ax=Max("max_ax"), max_max_ay=Max("max_ay"), max_max_az=Max("max_az")) \
                  .annotate(avg_max_ax=Avg("max_ax"), avg_max_ay=Avg("max_ay"), avg_max_az=Avg("max_az")) \
+                 .annotate(sum_duration=Sum("duration")) \
+                 .annotate(sum_rounds=Sum("rounds")) \
                  .order_by("-count")
 
 def records_per_model_to_table(**lookups):
     records = get_records_per_model(**lookups)
 
+    # Determine longest model name and count
+    len_model = reduce(max, map(lambda x: len(x["model"]), records))
+    len_count = reduce(max, map(lambda x: len(str(x["count"])), records))
+
     for record in records:
-        print "%s & %d & %.2f/%.2f/%.2f & %.2f/%.2f/%.2f \\\\" % (
-            record["model"],
-            record["count"],
+        print "%s & %s & %.2f & %.1f/%.1f/%.1f & %.1f/%.1f/%.1f \\\\" % (
+            affix_space(record["model"], len_model),
+            affix_space(str(record["count"]), len_count),
+            float(record["sum_duration"]) / float(record["sum_rounds"]),
             record["min_min_ax"], record["min_min_ay"], record["min_min_az"],
             record["max_max_ax"], record["max_max_ay"], record["max_max_az"]
         )

@@ -4,12 +4,21 @@ import sys
 import os
 import formic
 
-# Select which tests to disable
+# Tests to disable
 DISABLED_TESTS = [
     "dab_bytedistrib",
     "marsaglia_tsang_gcd",
     "rgb_minimum_distance",
     "rgb_kstest_test"
+]
+
+# Generators to disable
+DISABLED_GENERATORS = [
+    #"dummy",
+    "openssl_prng",
+    "aes128_ctr",
+    "sha256v2",
+    "sha256",
 ]
 
 def main(argv):
@@ -34,6 +43,10 @@ def main(argv):
             base = base.replace(input_dir, "")
             device = device.rsplit(".", 1)[0]
         except ValueError:
+            continue
+
+        # Filter disabled generators
+        if generator in DISABLED_GENERATORS:
             continue
 
         # Filter path if filters are given
@@ -89,16 +102,19 @@ def main(argv):
                     except ValueError:
                         continue
 
-                    # Count results
-                    if test_name not in DISABLED_TESTS:
-                        total += 1
+                    # Check if test is not ignored
+                    if test_name in DISABLED_TESTS:
+                        continue
 
-                        if assessment == "FAILED":
-                            failed += 1
-                        elif assessment == "PASSED":
-                            passed += 1
-                        elif assessment == "WEAK":
-                            weak += 1
+                    # Count results
+                    total += 1
+
+                    if assessment == "FAILED":
+                        failed += 1
+                    elif assessment == "PASSED":
+                        passed += 1
+                    elif assessment == "WEAK":
+                        weak += 1
 
             # Print result
             sys.stdout.write("%s,%s,%s,%s,%d,%d,%d,%d\n" % (base, device, generator, extractor, total, passed, failed, weak))
