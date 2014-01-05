@@ -13,11 +13,12 @@ DISABLED_TESTS = [
 ]
 
 def main(argv):
-    if len(argv) != 2:
-        sys.stdout.write("Syntax: %s <input_dir>\n" % argv[0])
+    if len(argv) < 2:
+        sys.stdout.write("Syntax: %s <input_dir> [<path_filter1> ... <path_filterN>]\n" % argv[0])
         return 1
 
     input_dir = os.path.abspath(argv[1])
+    path_filters = argv[2:]
 
     # Find files
     file_set = formic.FileSet(include="**/*.diehard", directory=input_dir)
@@ -34,6 +35,21 @@ def main(argv):
             device = device.rsplit(".", 1)[0]
         except ValueError:
             continue
+
+        # Filter path if filters are given
+        if len(path_filters) > 0:
+            success = False
+
+            for path_filter in path_filters:
+                temp_filter = path_filter.replace("%", "%s/%s" % (extractor, generator))
+
+                if temp_filter in filename:
+                    success = True
+                    break
+
+            # Do not include
+            if not success:
+                continue
 
         # Initialize counters
         total = 0

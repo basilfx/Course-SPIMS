@@ -22,9 +22,9 @@ EXTRACTORS = [
 
 # Generators take entropy and generate random numbers
 GENERATORS = [
-#    SHA256GenV2,
-#    AES128CtrGen,
-#    OpenSSLPRNGen,
+    SHA256GenV2,
+    AES128CtrGen,
+    OpenSSLPRNGen,
     DummyGen
 ]
 
@@ -33,7 +33,7 @@ GENERATORS = [
 NUMBERS_OUTPUT_SIZE = 5000000 * 5
 
 # Include gyro data or not
-INCLUDE_GYRO = True
+INCLUDE_GYRO = False
 
 def spawn(f):
     def fun(q_in,q_out):
@@ -175,7 +175,10 @@ def main(argv):
                         pass
 
     # Spawn several processes
-    parmap(_run, device_data_dict.keys(), min(cpus, len(device_data_dict)))
+    cpus = min(cpus, len(device_data_dict))
+    sys.stdout.write("Running with %d threads\n" % cpus)
+
+    parmap(_run, device_data_dict.keys(), cpus)
 
     # Done
     return 0
