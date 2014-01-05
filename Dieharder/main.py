@@ -8,6 +8,9 @@ import subprocess
 import formic
 import os
 
+TESTS = [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13, 15, 16, 100, 101, 102]
+#TESTS = [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13, 15, 16, 17, 100, 101, 102, 201, 204, 205]
+
 def main(argv):
     if len(argv) not in [2, 3]:
         sys.stdout.write("Syntax: %s <input_dir> [<cpus>]\n" % argv[0])
@@ -45,8 +48,6 @@ def run_job(file_name):
     if os.path.exists(output_file):
         os.remove(output_file)
 
-    #tests = [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13, 15, 16, 100, 101, 102]
-    tests = [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13, 15, 16, 17, 100, 101, 102, 201, 204, 205]
     pre_cmd = ["dieharder", "-f", pipes.quote(file_name), "-g", "201"]
     post_cmd = ["-D", "default", "-D", "histogram", ">>", pipes.quote(output_file)]
 
@@ -55,7 +56,7 @@ def run_job(file_name):
 
     start = datetime.now()
 
-    for test in tests:
+    for test in TESTS:
         command = pre_cmd + ["-d", str(test)] + post_cmd
         subprocess.call(" ".join(command), shell=True)
 

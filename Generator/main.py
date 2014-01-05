@@ -22,12 +22,14 @@ EXTRACTORS = [
 
 # Generators take entropy and generate random numbers
 GENERATORS = [
-    SHA256GenV2,
-    AES128CtrGen,
-    OpenSSLPRNGen
+#    SHA256GenV2,
+#    AES128CtrGen,
+#    OpenSSLPRNGen,
+    DummyGen
 ]
 
-# Defines the number of random numbers that must be generated
+# Defines the number of random numbers that must be generated. Only applies to
+# infinite generators.
 NUMBERS_OUTPUT_SIZE = 5000000 * 5
 
 # Include gyro data or not
@@ -165,9 +167,12 @@ def main(argv):
                     # Call generator
                     gen = generator(data)
 
-                    for i in xrange(NUMBERS_OUTPUT_SIZE):
+                    try:
                         # Write to file
-                        output_file.write(gen.get_rand())
+                        for i in xrange(NUMBERS_OUTPUT_SIZE):
+                            output_file.write(gen.get_rand())
+                    except StopIteration:
+                        pass
 
     # Spawn several processes
     parmap(_run, device_data_dict.keys(), min(cpus, len(device_data_dict)))

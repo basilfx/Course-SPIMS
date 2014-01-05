@@ -99,3 +99,20 @@ class OpenSSLPRNGen:
 
 	def get_rand(self):
 		return self.prng.bytes(1)
+
+class DummyGen:
+	name = "dummy"
+
+	def __init__(self, input):
+		self.input = input
+		self.index = 0
+		self.length = len(input)
+
+	def get_rand(self):
+		if self.index == self.length:
+			raise StopIteration
+
+		byte = self.input[self.index]
+		self.index += 1
+
+		return byte
