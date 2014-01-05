@@ -6,10 +6,15 @@ import pipes
 import multiprocessing
 import subprocess
 import formic
-import os
+import time
+import random
 
+# Which DIEHARDER tests to include
 TESTS = [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13, 15, 16, 100, 101, 102]
 #TESTS = [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13, 15, 16, 17, 100, 101, 102, 201, 204, 205]
+
+# Skip test if output file already exists
+SKIP_IF_EXISTS = True
 
 def main(argv):
     if len(argv) not in [2, 3]:
@@ -42,10 +47,15 @@ def main(argv):
 
 
 def run_job(file_name):
+    time.sleep(random.random())
     output_file = file_name.rsplit(".", 1)[0] + ".diehard"
 
     # Remove old file since we concatenate
     if os.path.exists(output_file):
+        if SKIP_IF_EXISTS and os.stat(output_file).st_size > 0:
+            sys.stdout.write("Skipping test for '%s'\n" % file_name)
+            return
+
         os.remove(output_file)
 
     pre_cmd = ["dieharder", "-f", pipes.quote(file_name), "-g", "201"]

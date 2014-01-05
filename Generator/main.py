@@ -16,6 +16,7 @@ import random
 EXTRACTORS = [
     raw,
     merged,
+    #mergedv2,
     von_neumann2,
     aes128_cbc_mac
 ]
@@ -25,7 +26,8 @@ GENERATORS = [
     SHA256GenV2,
     AES128CtrGen,
     OpenSSLPRNGen,
-    DummyGen
+    DummyGen,
+    #DummyRepGen
 ]
 
 # Defines the number of random numbers that must be generated. Only applies to
@@ -33,7 +35,7 @@ GENERATORS = [
 NUMBERS_OUTPUT_SIZE = 5000000 * 5
 
 # Include gyro data or not
-INCLUDE_GYRO = False
+INCLUDE_GYRO = True
 
 def spawn(f):
     def fun(q_in,q_out):

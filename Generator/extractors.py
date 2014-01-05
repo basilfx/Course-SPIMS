@@ -18,6 +18,14 @@ def merged(inp):
 
 	return res
 
+def mergedv2(inp):
+	res = list()
+
+	for i in xrange(len(inp) - 2):
+		res.append(chr(ord(inp[i]) ^ ord(inp[i + 1]) ^ ord(inp[i + 2])))
+
+	return res
+
 # Applies an iterated Von Neumann extractor to the input values' dimensions
 def von_neumann(inp):
 	bitstr = reduce(lambda s, i: s +  "".join([bin(ord(j))[2:] for j in i]), inp)

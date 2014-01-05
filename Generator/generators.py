@@ -116,3 +116,17 @@ class DummyGen:
 		self.index += 1
 
 		return byte
+
+class DummyRepGen:
+	name = "dummyrep"
+
+	def __init__(self, input):
+		self.input = input
+		self.index = 0
+		self.length = len(input)
+
+	def get_rand(self):
+		byte = self.input[self.index]
+		self.index = (self.index + 1) % self.length
+
+		return byte
