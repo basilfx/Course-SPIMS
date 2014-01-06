@@ -70,7 +70,7 @@ def plot_histogram_top_n(n, m, p, **lookups):
     data = []
     models = []
 
-    figure = pylab.figure()
+    figure = pylab.figure(figsize=(16, 6))
     axis = figure.add_subplot(1, 1, 1)
 
     for n in top_n:
@@ -78,6 +78,10 @@ def plot_histogram_top_n(n, m, p, **lookups):
         models.append(n["model"])
 
     n, bins, patches = axis.hist(data, p, histtype="bar", label=models)
+
+    axis.set_xlim(0, m)
+    axis.set_ylabel("Frequency")
+    axis.set_xlabel("Algorithm output")
 
     pylab.grid(True)
     pylab.legend()
@@ -87,10 +91,10 @@ def plot_histogram_top_n(n, m, p, **lookups):
 def plot_histogram_all(m, p, **lookups):
     data = []
 
-    figure = pylab.figure()
+    figure = pylab.figure(figsize=(16, 6))
     axis = figure.add_subplot(1, 1, 1)
 
-    data.append(map(lambda x: min(x.sensor_da2_max, m), Record.objects.all()))
+    data.append(map(lambda x: min(x.sensor_da2_max, m), Record.objects.filter(**lookups)))
 
     n, bins, patches = axis.hist(data, p, histtype="bar")
 
@@ -100,7 +104,11 @@ def plot_histogram_all(m, p, **lookups):
     print n, x
     axis_cum.plot(bins, [0.0] + n, 'r--')
     axis_cum.set_ylim([0, 100])
+    axis.set_xlim(0, m)
     axis_cum.set_ylabel("Cumulative Frequency (%)")
+
+    axis.set_ylabel("Frequency")
+    axis.set_xlabel("Algorithm output")
 
     pylab.grid(True)
     pylab.legend()

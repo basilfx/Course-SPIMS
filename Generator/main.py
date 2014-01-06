@@ -132,7 +132,7 @@ def main(argv):
 
         # Stats
         sys.stdout.write("Read %d lines of data for '%s' in memory\n" % (lines, device_key))
-
+    return
     # Iterate over each device
     #for device, data in device_data_dict.iteritems():
     def _run(device):
