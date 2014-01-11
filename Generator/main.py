@@ -14,11 +14,13 @@ import random
 # Extractors are transformations that attempt to extract
 # randomness from non-randomness in entropy sources
 EXTRACTORS = [
-    raw,
-    merged,
-    #mergedv2,
-    von_neumann2,
-    aes128_cbc_mac
+    #raw,
+    #merged,
+    running_merged,
+    better_estimate,
+    naive_estimate,
+    #von_neumann2,
+    #aes128_cbc_mac
 ]
 
 # Generators take entropy and generate random numbers
@@ -73,12 +75,13 @@ def main(argv):
     output_dir = os.path.abspath(argv[2])
 
     try:
-        cpus = int(argv[2])
+        cpus = int(argv[3])
     except (LookupError, ValueError):
         cpus = multiprocessing.cpu_count()
 
     file_names = glob.glob(os.path.join(input_dir, "*.txt"))
     device_data_dict = collections.defaultdict(list)
+    device_data_size = collections.defaultdict(int)
 
     sys.stdout.write("Found %d result files in %d directories\n" % (len(file_names), len(argv[2:])))
 
@@ -89,12 +92,15 @@ def main(argv):
             file_type = next(input_file).strip()
 
             if file_type == "# General":
+                size = 4
                 mapper = float
                 formatting = "fff"
             if file_type == "# GeneralV2":
+                size = 4
                 mapper = int
                 formatting = "iii"
             elif file_type == "# Raw":
+                size = 2
                 mapper = int
                 formatting = "hhh"
 
@@ -107,6 +113,9 @@ def main(argv):
 
             device_key = "%s_%s" % (device_string, device_id)
             lines = 0
+
+            # Store size
+            device_data_size[device_key] = size
 
             # Read data lines
             for line in input_file:
@@ -132,7 +141,7 @@ def main(argv):
 
         # Stats
         sys.stdout.write("Read %d lines of data for '%s' in memory\n" % (lines, device_key))
-    return
+
     # Iterate over each device
     #for device, data in device_data_dict.iteritems():
     def _run(device):
@@ -143,8 +152,29 @@ def main(argv):
         for extractor in EXTRACTORS:
             ext_name = extractor.__name__
 
+            # Grab extractor properties
+            output = []
+
             # Apply extractor
-            data = extractor(data)
+            input_blocks = getattr(extractor, "input_blocks", False)
+            input_bytes = getattr(extractor, "input_bytes", False)
+            input_shift = getattr(extractor, "input_shift", False)
+
+            if input_blocks or input_bytes:
+                chunk_size = input_bytes or (input_blocks * device_data_size[device_key])
+                chunk_step = input_bytes or (input_blocks * input_shift)
+
+                # Iterate over each N bytes
+                for i in xrange(0, len(data), chunk_step):
+                    bytes = data[i:i + chunk_size]
+
+                    if len(bytes) == chunk_size:
+                        # Call extractor
+                        output += list(extractor(bytes))
+
+                data = output
+            else:
+                data = extractor(device_data_dict[device])
 
             for generator in GENERATORS:
                 gen_name = generator.name

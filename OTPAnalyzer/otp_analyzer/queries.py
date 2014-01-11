@@ -74,7 +74,11 @@ def plot_histogram_top_n(n, m, p, **lookups):
     axis = figure.add_subplot(1, 1, 1)
 
     for n in top_n:
-        data.append(map(lambda x: min(x.sensor_da2_max, m), Record.objects.filter(model=n["model"])))
+        #temp = filter(lambda x: x.sensor_da2_max < m, Record.objects.filter(model=n["model"]))
+        temp = Record.objects.filter(model=n["model"])
+        temp = map(lambda x: min(x.sensor_da2_max, m), temp)
+
+        data.append(temp)
         models.append(n["model"])
 
     n, bins, patches = axis.hist(data, p, histtype="bar", label=models)
@@ -94,6 +98,7 @@ def plot_histogram_all(m, p, **lookups):
     figure = pylab.figure(figsize=(16, 6))
     axis = figure.add_subplot(1, 1, 1)
 
+    #data = filter(lambda x: x.sensor_da2_max < m, data)
     data.append(map(lambda x: min(x.sensor_da2_max, m), Record.objects.filter(**lookups)))
 
     n, bins, patches = axis.hist(data, p, histtype="bar")

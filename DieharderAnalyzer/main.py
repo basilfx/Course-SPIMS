@@ -15,10 +15,10 @@ DISABLED_TESTS = [
 # Generators to disable
 DISABLED_GENERATORS = [
     #"dummy",
-    "openssl_prng",
-    "aes128_ctr",
-    "sha256v2",
-    "sha256",
+    #"openssl_prng",
+    #"aes128_ctr",
+    #"sha256v2",
+    #"sha256",
 ]
 
 def main(argv):
@@ -34,7 +34,7 @@ def main(argv):
     filenames = list(file_set)
 
     # Print header
-    sys.stdout.write("base,filename,Generator,Extactor,TOTAL,PASSED,FAILED,WEAK\n")
+    sys.stdout.write("base,filename,Generator,Extactor,TOTAL,PASSED,FAILED,WEAK,File-bytes,Entropy,Chi-square,Mean,Monte-Carlo-Pi,Serial-Correlation\n")
 
     for filename in filenames:
         # Strip extractor and generator name from path
@@ -64,6 +64,10 @@ def main(argv):
             if not success:
                 continue
 
+        # Resolve filenames
+        filename_dh = filename
+        filename_ent = filename.rsplit(".", 1)[0] + ".ent"
+
         # Initialize counters
         total = 0
         weak = 0
@@ -71,8 +75,8 @@ def main(argv):
         passed = 0
         state = 0
 
-        # Read file and scan for test results
-        with open(filename, "r") as fp:
+        # Read DIEHARDER file and scan for test results
+        with open(filename_dh, "r") as fp:
             for line in fp:
                 # Search for 'test_name'
                 if state == 0:
@@ -116,8 +120,17 @@ def main(argv):
                     elif assessment == "WEAK":
                         weak += 1
 
-            # Print result
-            sys.stdout.write("%s,%s,%s,%s,%d,%d,%d,%d\n" % (base, device, generator, extractor, total, passed, failed, weak))
+        # Read Ent file
+        with open(filename_ent, "r") as fp:
+            lines = []
+
+            for line in fp:
+                lines.append(line.strip())
+
+            ent = lines[1].split(",", 1)[1]
+
+        # Print result
+        sys.stdout.write("%s,%s,%s,%s,%d,%d,%d,%d,%s\n" % (base, device, generator, extractor, total, passed, failed, weak, ent))
 
     # Done
     return 0
