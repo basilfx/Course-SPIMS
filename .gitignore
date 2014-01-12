@@ -1,4 +1,8 @@
 # OTPAnalyzer/.gitignore
 # OTPTest/.gitignore
 # Generator/.gitignore
+# GeneratorV2/.gitignore
 # RawRecorder/.gitignore
+# Dieharder/.gitignore
+# DieharderAnalyzer/.gitignore
+# DieharderSummer/.gitignore
